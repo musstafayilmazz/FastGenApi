@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  glove-postgres:
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    container_name: glove-postgres
+    tty: true
+    restart: always
+    networks:
+      app-network:
+        ipv4_address: 172.18.0.2
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../database:/var/lib/postgresql/data
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    command: >
+      bash -c "chmod -R 777 /var/lib/postgresql/data &&
+               docker-entrypoint.sh postgres"
+
+  glove-fastapi:
+    container_name: glove-fastapi
+    build:
+      context: ./docker/python
+      dockerfile: Dockerfile
+    volumes:
+      - ../backend:/backend
+    working_dir: /
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 80
+    ports:
+      - "1907:80"
+    restart: always
+    environment:
+      service_name: glove-fastapi
+    networks:
+      - app-network
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    volumes:
+      - minio-data:/data
+    networks:
+      app-network:
+        ipv4_address: 172.18.0.4
+
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+
+volumes:
+  minio-data:

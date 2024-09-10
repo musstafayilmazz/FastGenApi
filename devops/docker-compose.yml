@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  glove-postgres:
+  aarti-postgres:
     build:
       context: ./docker/postgres
       dockerfile: Dockerfile
-    container_name: glove-postgres
+    container_name: aarti-postgres
     tty: true
     restart: always
     networks:
@@ -23,8 +23,8 @@ services:
       bash -c "chmod -R 777 /var/lib/postgresql/data &&
                docker-entrypoint.sh postgres"
 
-  glove-fastapi:
-    container_name: glove-fastapi
+  aarti-fastapi:
+    container_name: aarti-fastapi
     build:
       context: ./docker/python
       dockerfile: Dockerfile
@@ -36,7 +36,7 @@ services:
       - "1907:80"
     restart: always
     environment:
-      service_name: glove-fastapi
+      service_name: aarti-fastapi
     networks:
       - app-network
 
@@ -57,7 +57,7 @@ services:
 
 networks:
   app-network:
-    name: glove
+    name: aarti
 
 volumes:
   minio-data:

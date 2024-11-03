@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from backend.database.db_connection import connect_to_db
 from backend.routers.file_route import router as file_router
 from backend.routers.query_route import router as embedding_router
@@ -13,4 +13,7 @@ app.include_router(embedding_router, prefix="/api/v1")
 
 @app.get("/db_connection")
 async def get_db(db=Depends(connect_to_db)):
-    return {"db_connection": str(db)}
+    try:
+        return {"db_connection": "Database connection is active"}
+    except Exception:
+        raise HTTPException(status_code=500, detail="Database connection failed")

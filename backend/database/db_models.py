@@ -9,7 +9,7 @@ Base = declarative_base()
 class PdfEmbedding(Base):
     __tablename__ = "tb_embeddings"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    pdf_id = Column(Integer, autoincrement=True)  # New auto-incrementing field for each PDF
+    pdf_id = Column(Integer, autoincrement=True)
     filename = Column(String, nullable=False)
     chunk_index = Column(Integer, nullable=False)
     chunk_text = Column(String, nullable=False)
@@ -21,7 +21,6 @@ class PdfEmbedding(Base):
     )
 
 def create_db_and_table():
-    # Use the database_url from the config
     engine = create_engine(config.database_url)
     Base.metadata.create_all(engine)
     return sessionmaker(bind=engine)()

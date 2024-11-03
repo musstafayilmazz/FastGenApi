@@ -139,27 +139,30 @@ def get_related_chunks(question):
     return related_chunks
 
 
+# backend/services/queryService.py
+
 def get_related_chunks_by_filename(query, filename):
     logging.info(f"Generating embedding for question: {query}")
-    question_embedding = generate_embedding(query)
-
-    session = create_db_and_table()
-    file_exists = session.query(PdfEmbedding).filter(PdfEmbedding.filename == filename).first()
-    if not file_exists:
-        raise HTTPException(status_code=404, detail=f"No records found for filename: {filename}")
-
+    session = None
     try:
-        query = session.query(PdfEmbedding.chunk_text).filter(
+        question_embedding = generate_embedding(query)
+        session = create_db_and_table()
+        file_exists = session.query(PdfEmbedding).filter(PdfEmbedding.filename == filename).first()
+        if not file_exists:
+            raise HTTPException(status_code=404, detail=f"No records found for filename: {filename}")
+
+        query_result = session.query(PdfEmbedding.chunk_text).filter(
             PdfEmbedding.filename == filename
         ).order_by(
             func.l2_distance(PdfEmbedding.embedding, func.cast(question_embedding, PdfEmbedding.embedding.type))
         ).limit(5)
 
-        result = query.all()
+        result = query_result.all()
         related_chunks = [row.chunk_text for row in result]
         logging.info(f"Retrieved {len(related_chunks)} related chunks for filename {filename}.")
     finally:
-        session.close()
+        if session:
+            session.close()
 
     # Clean up
     del question_embedding
@@ -167,3 +170,4 @@ def get_related_chunks_by_filename(query, filename):
     gc.collect()
 
     return related_chunks
+

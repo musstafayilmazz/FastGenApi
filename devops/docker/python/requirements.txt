@@ -53,5 +53,7 @@ pgvector
 pymupdf
 transformers
 torch
+pytest
+pytest-mock
 
 

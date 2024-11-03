@@ -12,7 +12,7 @@
 In the project folder :
 
 ```
-copy .env.example file to .env file because of this project is a demo project I directly added configurations to .env.example file.
+I directly added env file to project because this is a demo project. For just bypass one step i skipped .env.example part
 ```
 
 #### If you added docker to user group
